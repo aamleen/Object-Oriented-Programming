@@ -1,5 +1,8 @@
 import java.util.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class COVIN {
 
@@ -10,7 +13,7 @@ public class COVIN {
     Map<String,ArrayList<Integer>> vaccine_hospital;
     Slots slot;
     ArrayList<String> vax_names;
-    Scanner sc;
+    BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
     COVIN(){
         hospital_data=new HashMap<>();
         citizen_data=new HashMap<>();
@@ -19,18 +22,18 @@ public class COVIN {
         vaccine_data=new HashMap<>();
         vax_names=new ArrayList<>();
         slot=new Slots();
-        sc=new Scanner(System.in);
+        
     }
     
-    void addVaccine(){
+    void addVaccine()throws IOException{
         System.out.println("Vaccine Name: ");
-        String name=sc.next();
+        String name=br.readLine();
         System.out.println("Number of doses: ");
-        int doses=sc.nextInt();  sc.nextLine();
+        int doses=Integer.parseInt(br.readLine());
         int day_gap=0;
         if(doses>1){
             System.out.println("Gap between Doses: ");
-            day_gap=sc.nextInt();  sc.nextLine();
+            day_gap=Integer.parseInt(br.readLine());
         }
         if(doses<0 || day_gap<0)
         {    System.out.println("Values should be +ve");
@@ -43,12 +46,11 @@ public class COVIN {
         vax.DisplayDetails();
     }
 
-    void registerHospital(){
+    void registerHospital()throws IOException{
         System.out.println("Hospital Name: ");
-        sc.next();
-        String name=sc.nextLine();
+        String name=br.readLine();
         System.out.println("Pincode: ");
-        int pincode=sc.nextInt();  sc.nextLine();
+        int pincode=Integer.parseInt(br.readLine());
         Hospital h= new Hospital(name,pincode,vax_names.size());
         if(pincode_hospital.get(pincode)==null)
             pincode_hospital.put(pincode,new ArrayList<>());
@@ -58,19 +60,19 @@ public class COVIN {
         h.displayHospital();
     }
 
-    void displayChoice(){
+    void displayChoice()throws IOException{
         for(int i=0;i<vax_names.size();i++){
             System.out.println(i+"-> "+vax_names.get(i));
         }
     }
 
-    void registerCitizen(){
+    void registerCitizen()throws IOException{
         System.out.println("Citizen Name: ");
-        String name=sc.nextLine();
+        String name=br.readLine();
         System.out.println("Age: ");
-        int age=sc.nextInt();  sc.nextLine();
+        int age=Integer.parseInt(br.readLine());
         System.out.println("Unique ID: ");
-        String UID=sc.next();
+        String UID=br.readLine();
         if(UID.length()!=12)
         {
             System.out.println("Invalid UID given, should be 12 digits");
@@ -84,9 +86,9 @@ public class COVIN {
         citizen_data.put(c.UID,c);
     }
   
-    void addSlot(){
+    void addSlot()throws IOException{
         System.out.println("Enter Hospital ID: ");
-        String ID=sc.next();
+        String ID=br.readLine();
         if(ID.length()!=6){
             System.out.println("Invalid UID given, should be 6 digits");
             return;
@@ -97,15 +99,15 @@ public class COVIN {
             return;
         }
         System.out.println("Enter number of slots to be added");
-        int nslots=sc.nextInt();  sc.nextLine();
+        int nslots=Integer.parseInt(br.readLine());
         for(int i=0;i<nslots;i++){
             System.out.println("Enter Day Number");
-            int day=sc.nextInt();  sc.nextLine();
+            int day=Integer.parseInt(br.readLine());
             System.out.println("Enter Quantity");
-            int quantity=sc.nextInt();  sc.nextLine();
+            int quantity=Integer.parseInt(br.readLine());
             System.out.println("Select vaccine: ");
             displayChoice();
-            int choice=sc.nextInt();  sc.nextLine();
+            int choice=Integer.parseInt(br.readLine());
             String vac_name=vax_names.get(choice);
             hospital_data.get(UID).addSlots(slot, day, quantity,vax_names.size(),choice);
             if(vaccine_hospital.get(vac_name).indexOf(UID)==-1)
@@ -115,9 +117,9 @@ public class COVIN {
 
     }
 
-    void bookSlot(){
+    void bookSlot()throws IOException{
         System.out.println("Enter patient UID: ");
-        long UID=sc.nextLong();  sc.nextLine();
+        long UID=sc.nextLong();  br.readLine();
         if(citizen_data.get(UID)==null)
         {
             System.out.println("Not registered yet!!");
@@ -130,10 +132,10 @@ public class COVIN {
         }
         System.out.println("1. Search By Area \n2. Search By Vaccine \n3. Exit");
         System.out.println("Enter Choice:");
-        int choice=sc.nextInt();  sc.nextLine();
+        int choice=Integer.parseInt(br.readLine());
         switch(choice){
             case 1: System.out.println("Enter Pincode: ");
-                    int pincode=sc.nextInt();  sc.nextLine();
+                    int pincode=Integer.parseInt(br.readLine());
                     ArrayList<Integer> hosp_pincode=pincode_hospital.get(pincode);
                     if(hosp_pincode==null){
                         System.out.println("Invalid Pincode");
@@ -148,12 +150,12 @@ public class COVIN {
                         System.out.println(hosp_UID+" -> "+hospital_data.get(hosp_UID).name);
                     }
                     System.out.println("Enter Hospital ID:");
-                    int choice_hosp=sc.nextInt();  sc.nextLine();
+                    int choice_hosp=Integer.parseInt(br.readLine());
                     int flag=slot.displaySlots(hospital_data.get(choice_hosp), patient.next_dose,vax_names);
                     if(flag==0)
                         return;
                     System.out.println("Choose Slot: ");
-                    int booking_slot=sc.nextInt();  sc.nextLine();
+                    int booking_slot=Integer.parseInt(br.readLine());
                     int booking_day=booking_slot%10;
                     int vaccine_index=booking_slot/10;
                     flag=citizen_data.get(UID).bookSlot(slot, hospital_data.get(choice_hosp), vaccine_data.get(vax_names.get(vaccine_index)), booking_day, vaccine_index,);
@@ -162,7 +164,7 @@ public class COVIN {
                     System.out.println(citizen_data.get(UID).name+" vaccinated with "+vax_names.get(vaccine_index));
                 break;
             case 2: System.out.println("Enter vaccine name:");
-                    String vaccine_name=sc.next();
+                    String vaccine_name=br.readLine();
                     ArrayList<Integer> hosp_vaccine=vaccine_hospital.get(vaccine_name);
                     if(hosp_vaccine==null)
                         return;
@@ -175,7 +177,7 @@ public class COVIN {
                         System.out.println(hosp_UID+" -> "+hospital_data.get(hosp_UID).name);
                     }
                     System.out.println("Enter Hospital ID:");
-                    int choice_hosp1=sc.nextInt();  sc.nextLine();
+                    int choice_hosp1=Integer.parseInt(br.readLine());
                     int vaccine_index1=vax_names.indexOf(vaccine_name);
                     int flag1=slot.display(hospital_data.get(choice_hosp1).day_wise_slots.get(vaccine_index1),0,patient.next_dose,vaccine_name);
                     if(flag1==0){
@@ -183,7 +185,7 @@ public class COVIN {
                         return;
                     }
                     System.out.println("Choose Slot: ");
-                    int booking_day1=sc.nextInt();  sc.nextLine();
+                    int booking_day1=Integer.parseInt(br.readLine());
                     flag1=citizen_data.get(UID).bookSlot(slot, hospital_data.get(choice_hosp1), vaccine_data.get(vaccine_name), booking_day1, vaccine_index1);
                     if(flag1==0)
                         return;
@@ -196,15 +198,15 @@ public class COVIN {
         }
     }
 
-    void displayHospital_slots(){
+    void displayHospital_slots()throws IOException{
         System.out.println("Enter Hospital ID: ");
-        int hosp_ID=sc.nextInt();  sc.nextLine();
+        int hosp_ID=Integer.parseInt(br.readLine());
         slot.displaySlots(hospital_data.get(hosp_ID), 0, vax_names);
     }
 
-    void vaccination_status(){
+    void vaccination_status()throws IOException{
         System.out.println("Enter Patient ID: ");
-        Long cit_UID=sc.nextLong();  sc.nextLine();
+        Long cit_UID=sc.nextLong();  br.readLine();
         String vaccine_name=citizen_data.get(cit_UID).vaccine;
         if(vaccine_name==""){
             System.out.println("Citizen REGISTERED");
@@ -222,12 +224,12 @@ public class COVIN {
         System.out.println("Next Dose Due Date: "+citizen_data.get(cit_UID).next_dose);
     }
 
-    void Menu(){
+    void Menu()throws IOException{
         int choice=0;
         while(choice!=8){
             System.out.println("1. Add Vaccines \n2. Register Hospital \n3. Register Citizen \n4. Add Slot for Vaccination"); 
             System.out.println("5. Book Slot for Vaccination \n6. List all slots for a hospital \n7. Check Vaccination Status \n8. Exit");
-            choice=sc.nextInt();  sc.nextLine();
+            choice=Integer.parseInt(br.readLine());
             switch(choice){
                 case 1: addVaccine();
                     break;
@@ -250,7 +252,7 @@ public class COVIN {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)throws IOException {
         COVIN version1=new COVIN();
         System.out.println("\tCoWin Portal Initialized");
         System.out.println("---------------------------------------");
