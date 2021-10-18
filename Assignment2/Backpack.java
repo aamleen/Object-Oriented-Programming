@@ -63,61 +63,126 @@ class lectures{
 class Assessment{
 
     private Map<Integer,String[]> Assignment;
-    private Map<Integer,String[]> Quiz;
-    private Map<Integer,Map<Integer,String>> Quiz_submission;
-    private Map<Integer,Map<Integer,String>> Assignment_submission;
-    private Map<Integer,Map<Integer,Integer>> Assignment_grades;
-    private Map<Integer,Map<Integer,Integer>> Quiz_grades;
+    private Map<Integer,Map<Integer,String>> Submission;
+    private Map<Integer,Map<Integer,Integer>> Grades;
+    private Map<Integer,String> type;
+    private Map<Integer,Boolean> status_closed;    //True if assignment closed
     private static int assgn_id=0;
-    Assessment(){
+    private int no_of_students;
+    Assessment(int n){
         Assignment=new HashMap<>();
-        Quiz=new HashMap<>();
-        
     }
 
-    void add_Assignment(String problem, int mm){
+    void add_Assignment(String problem, int mm, String type){
         Assignment.put(assgn_id,new String[]{problem,String.valueOf(mm)});
-        Assignment_submission.put(assgn_id, new HashMap<>());
-        Assignment_grades.put(assgn_id, new HashMap<>());
+        Submission.put(assgn_id, new HashMap<>());
+        Grades.put(assgn_id, new HashMap<>());
+        type.put(assgn_id,type);
         assgn_id+=1;
     }
-    void add_Quiz(String problem){
-        Quiz.put(assgn_id,new String[]{problem,"1"});
-        Quiz_submission.put(assgn_id, new HashMap<>());
-        Quiz_grades.put(assgn_id, new HashMap<>());
-        assgn_id+=1;
-    }
-
+    
     void view_assessment(){
-        System.out.println("List of open Asssigments: \n");
+        System.out.println("List of Asssigments: \n");
         for(int ass_id : Assignment.keySet()){
             System.out.print("ID: "+ass_id);
-            System.out.print(" Assignment: "+Assignment.get(ass_id)[0]);
+            System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
             System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
             System.out.println("----------------");
         }
-        System.out.println("List of open Quizzes: \n");
-        for(int ass_id : Quiz.keySet()){
-            System.out.print("ID: "+ass_id);
-            System.out.print(" Assignment: "+Quiz.get(ass_id)[0]);
-            System.out.println(" Max Marks: "+Quiz.get(ass_id)[1]);
-            System.out.println("--------------------");
+        
+    }
+
+    
+    int view_pending(){
+        int flag=0;
+        for(int ass_id : Assignment.keySet()){
+            if(isClosed(ass_id))
+                continue;
+            if(Submission.get(ass_id)==null){
+                System.out.print("ID: "+ass_id);
+                System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
+                System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+                System.out.println("----------------");
+                flag=1;
+            }
         }
+        return flag;
+    }
+
+    int pending_Evaluation(){
+        int flag=0;
+        for(int ass_id : Assignment.keySet()){
+            if(isClosed(ass_id))
+                continue;
+            if(Submission.get(ass_id).size()==no_of_students)
+                continue;
+            else{
+                System.out.print("ID: "+ass_id);
+                System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
+                System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+                System.out.println("----------------");
+                flag=1;
+            }
+        }
+        return flag;
+    }
+
+    boolean isClosed(int ID){
+        return status_closed.get(ID);
     }
 
     void submit_Assignment(int choice, int stu_id, String answer){
-        Assignment_submission.get(choice).get(stu_id);
+        Submission.get(choice).put(stu_id,answer);
+
+    }
+
+    void grade_Assignment(int choice, int stu_id){
+        int marks=0;
+        Grades.get(choice).put(stu_id,marks);
+    }
+
+    void close_Assignmenet(){
+        System.out.println("List of OPEN Asssigments: \n");
+        int flag=0
+        for(int ass_id : Assignment.keySet()){
+            if(isClosed(ass_id))
+                continue;
+            System.out.print("ID: "+ass_id);
+            System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
+            System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+            System.out.println("----------------");
+            flag=1;
+        }
     }
 
 }
 
 class Discussion_Forum{
+    private Map<Date,String[]> comment;  //[Comment Uploadedby] 
+    
+    Discussion_Forum(){
+        comment=new HashMap<>();
+    }
 
+    void add_Comment(String arr[]){
+        slides.put(new Date(),arr);
+    }
+
+    void view_Comments(){
+        System.out.println("Comments: \n");
+        for(Date d : comment.keySet()){
+            String arr[]=comment.get(d);
+            System.out.print(arr[0]+" --"+arr[1]);
+            System.out.println("Date of Upload: "+d);
+        }
+    }
 }
 
-class Professor{
+class Professor implements commmon_User{
+
+    
 }
 
-class Student{
+class Student implements commmon_User{
 
 }
