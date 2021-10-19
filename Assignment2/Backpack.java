@@ -29,6 +29,7 @@ public class Backpack {
         }
         int choice;
         while(true){
+            System.out.println("\nWelcome "+prof);
             System.out.println("1. Add class material \n2. Add assessments \n3. View lecture materials");
             System.out.println("4. View assessments \n5. Grade assessments \n6. Close assessment");
             System.out.println("7. View comments \n8. Add comments \n9. Logout");
@@ -75,6 +76,7 @@ public class Backpack {
         }
         int choice;
         while(true){
+            System.out.println("\nWelcome "+stud);
             System.out.println("1. View lecture material \n2. View assessments \n3. Submit Assessment \n4. View Grades");
             System.out.println("5. View comments \n6. Add comments \n7. Logout");
             choice= Integer.parseInt(br.readLine());
@@ -101,9 +103,9 @@ public class Backpack {
         int choice;
         while(true){
             System.out.println("Welcome to Backpack");
-            System.out.println("Enter as Instructor");
-            System.out.println("Enter as Student");
-            System.out.println("Exit");
+            System.out.println("1-> Enter as Instructor");
+            System.out.println("2-> Enter as Student");
+            System.out.println("3-> Exit");
             choice= Integer.parseInt(br.readLine());
             switch (choice){
                 case 1: Prof_Menu();
@@ -198,15 +200,28 @@ class course{
         use.view_comments(comments);
     }
 
-    void add_comments(User use){
-        use.view_comments(comments);
+    void add_comments(User use)throws IOException{
+        use.add_comments(comments);
     }
 
     void submit_assessments(Student stu)throws IOException{
         stu.submit_assessments(assessment);
     }
+}
 
-    
+interface User{
+
+    default void view_lectures(lectures lec){
+        lec.view_lectures();
+    }
+    default void view_assessment(Assessment assess){
+        assess.view_assessment();
+    }
+    default void view_comments(Discussion_Forum comments){
+        comments.view_Comments();
+    }
+    void add_comments(Discussion_Forum comments)throws IOException;
+    void assessment_grades(Assessment assessment)throws IOException;    //grades the assignment in case of prof, and views the grades for student
     
 }
 
@@ -216,6 +231,7 @@ class Professor implements User{
     Professor(int ID){
         this.ID=ID;
     }
+
     @Override
     public String toString() {
         return ("I"+ID);
@@ -339,23 +355,6 @@ class Student implements User{
     }
 }
 
-
-interface User{
-
-    default void view_lectures(lectures lec){
-        lec.view_lectures();
-    }
-    default void view_assessment(Assessment assess){
-        assess.view_assessment();
-    }
-    default void view_comments(Discussion_Forum comments){
-        comments.view_Comments();
-    }
-    void add_comments(Discussion_Forum comments)throws IOException;
-    void assessment_grades(Assessment assessment)throws IOException;
-    
-}
-
 class lectures{
     private Map<Date,String[]> videos;  //[Title FileName Uploadedby] 
     private Map<Date,String[]> slides;  //[Title Slides Uploadedby]
@@ -415,6 +414,7 @@ class Assessment{
         Grades=new HashMap<>();
         type=new HashMap<>();
         status_closed=new HashMap<>();
+        no_of_students=n;
     }
 
     void add_Assignment(String problem, int mm, String typ){
@@ -429,15 +429,13 @@ class Assessment{
     void view_assessment(){
         System.out.println("List of Asssigments: \n");
         for(int ass_id : Assignment.keySet()){
-            System.out.print("ID: "+ass_id);
-            System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
-            System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+            System.out.print("ID : "+ass_id);
+            System.out.print("  "+type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
+            System.out.println("   Max Marks: "+Assignment.get(ass_id)[1]);
             System.out.println("----------------");
         }
         
     }
-
-    
 
     boolean isClosed(int ID){
         return status_closed.get(ID);
@@ -452,7 +450,7 @@ class Assessment{
             if(Submission.get(ass_id).get(stu_id)==null){
                 System.out.print("ID: "+ass_id);
                 System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
-                System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+                System.out.println(" Max Marks: "+Assignment.get(ass_id)[1]);
                 System.out.println("----------------");
                 flag=1;
             }
@@ -493,20 +491,21 @@ class Assessment{
     void grade_Assignment(int prof_id)throws IOException{
         int flag=0;
         for(int ass_id : Submission.keySet()){
-            if(isClosed(ass_id))
-                continue;
-            if(Grades.get(ass_id).size()==no_of_students)
+            if(Grades.get(ass_id).size()==Submission.get(ass_id).size())
                 continue;
             else{
                 System.out.print("ID: "+ass_id);
                 System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
-                System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+                System.out.println(" Max Marks: "+Assignment.get(ass_id)[1]);
                 System.out.println("----------------");
                 flag=1;
             }
         }
-        if(flag==0)
+        if(flag==0){
+            System.out.println("No Assignments to grade");
             return;
+        }
+        System.out.println("Enter ID of assessment to view submissions: ");
         int assess_id=Integer.parseInt(br.readLine());
         System.out.println("Choose ID from these ungraded submissions");
         for(int stu_id : Submission.get(assess_id).keySet()){
@@ -533,7 +532,7 @@ class Assessment{
                 continue;
             System.out.println("Submission: "+Submission.get(assgn_id).get(stu_id));
             System.out.println("Marks scored: "+arr[0]);
-            System.out.println("Graded By: "+arr[1]+"\n");
+            System.out.println("Graded By: I"+arr[1]+"\n");
         }
         System.out.println("-------------------------------");
         System.out.println("Un-Graded Submissions: ");
@@ -555,7 +554,7 @@ class Assessment{
                 continue;
             System.out.print("ID: "+ass_id);
             System.out.print(type.get(ass_id)+": "+Assignment.get(ass_id)[0]);
-            System.out.print(" Max Marks: "+Assignment.get(ass_id)[1]);
+            System.out.println(" Max Marks: "+Assignment.get(ass_id)[1]);
             System.out.println("----------------");
             flag=1;
         }
@@ -585,7 +584,7 @@ class Discussion_Forum{
         System.out.println("Comments: \n");
         for(Date d : comment.keySet()){
             String arr[]=comment.get(d);
-            System.out.print(arr[0]+" --"+arr[1]);
+            System.out.println(arr[0]+" --"+arr[1]);
             System.out.println("Date of Upload: "+d);
         }
     }
