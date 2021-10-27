@@ -45,6 +45,7 @@ class SinglePlayer extends SnakeLadderApp{     //sets up the game and takes user
     private Player player;
     
     SinglePlayer(){
+        super();
         game=new Game();
         player=new Player(name_input());
         dice=new Dice(2);
@@ -54,7 +55,7 @@ class SinglePlayer extends SnakeLadderApp{     //sets up the game and takes user
     @Override
     void play(){
         while(player.getPosition()<13){
-            System.out.println("Hit enter to roll the dice");
+            System.out.println("\nHit enter to roll the dice");
             String s=SnakeLadderApp.sc.nextLine();
             if(s.length()!=0)
                 continue;
@@ -76,6 +77,7 @@ class MultiPlayer extends SnakeLadderApp{
     private Player[] players;
     
     MultiPlayer(int no_of_players){
+        super();
         game=new Game();
         dice=new Dice(2);
         players=new Player[no_of_players];
@@ -193,7 +195,7 @@ class Dice {
 }
 
 class Player{
-    private String name;
+    private final String name;
     private int score;
     private int position;
     Player(String name){
@@ -226,8 +228,11 @@ class Player{
 abstract class Floors{
     
     protected int location;
-    Floors(int location){
+    protected int next_location;
+
+    Floors(int location, int next_location){
         this.location=location;
+        this.next_location=next_location;
     }
     
     int jumpOnFloor(Player p){
@@ -239,13 +244,15 @@ abstract class Floors{
         return getNextLocation();
     }
     abstract void setScore(Player p);
-    abstract int getNextLocation();
+    int getNextLocation(){
+        return next_location;
+    }
 }
 
 class Empty extends Floors{
 
     Empty(int location){
-        super(location);
+        super(location,location);
         this.location=location;
     }
     @Override
@@ -258,21 +265,14 @@ class Empty extends Floors{
         p.setScore(p.getScore()+1);
     }
 
-    @Override
-    int getNextLocation() {
-        return location;
-    }
-    
 }
 
 class Snake extends Floors{
 
     protected int score_deduction;
-    protected int next_location;
     Snake(int location, int next_location){
-        super(location);
+        super(location,next_location);
         score_deduction=2;
-        this.next_location=next_location;
     }
     @Override
     public String toString() {
@@ -283,35 +283,25 @@ class Snake extends Floors{
     void setScore(Player p) {
         p.setScore(p.getScore()-score_deduction);
     }
-
-    @Override
-    int getNextLocation(){
-        return next_location;
-    }
 }
 
 class Ladder extends Floors{
 
     protected int score_addition;
-    protected int next_location;
     Ladder(int location,int next_location){
-        super(location);
+        super(location,next_location);
         score_addition=2;
-        this.next_location=next_location;
     }
     @Override
     public String toString() {
         return "Normal Ladder";
     }
 
+    @Override
     void setScore(Player p) {
         p.setScore(p.getScore()+score_addition);
     }
 
-    @Override
-    int getNextLocation(){
-        return next_location;
-    }
 }
 
 class Elevator extends Ladder{
