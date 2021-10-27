@@ -1,4 +1,11 @@
 import java.util.*;
+/* Bonus -> Made the game, multiplayer and added many functionalitites to make gaming convenient like:
+ Any player can quit willingly, in between if s/he is angry with the dice/luck xD. This will not stop the game in between for others.
+ Players can view scores in between to keep the competitive fire going on
+ At last the final rankings will be displayed based on the total points scored, and whosoever finished first
+ Also the game is smart enought to not count the ones who left in between in the final rankings of who finished first */
+
+
 
 abstract public class SnakeLadderApp {
 
@@ -75,11 +82,12 @@ class SinglePlayer extends SnakeLadderApp{     //sets up the game and takes user
 
 class MultiPlayer extends SnakeLadderApp{
     private Player[] players;
-    
+    private ArrayList<Integer> finished;
     MultiPlayer(int no_of_players){
         super();
         game=new Game();
         dice=new Dice(2);
+        finished=new ArrayList<>();
         players=new Player[no_of_players];
         for(int i=0;i<players.length;i++){
             players[i]=new Player(name_input());
@@ -92,12 +100,12 @@ class MultiPlayer extends SnakeLadderApp{
         while(players_finished<players.length){
             for(int i=0;i<players.length;i++){
                 String s="abcd"; //random initialization
-                if(players[i].getPosition()==13)
+                if(players[i].getPosition()==13 || finished.indexOf(i)!=-1)
                     continue;
                 System.out.println("\n----------------------------------------------");
                 System.out.print(players[i]+"\'s Turn:");
                 while(s.length()!=0){
-                    System.out.println("Hit enter to roll the dice or 1 to view score");
+                    System.out.println("Hit enter to roll the dice or 1 to view score or 0 to leave match");
                     s=SnakeLadderApp.sc.nextLine();
                     if(s.length()>0 && s.charAt(0)=='1')
                     {System.out.println("\n------------------------------------------------");
@@ -105,19 +113,41 @@ class MultiPlayer extends SnakeLadderApp{
                      System.out.println("\n------------------------------------------------");
                      view_scores();
                     }
+                    if(s.length()>0 && s.charAt(0)=='0')
+                        break;
                     if(s.length()!=0)
                         System.out.println("Dice was not rolled. Try again");
+                }
+                if(s.length()>0 && s.charAt(0)=='0'){
+                    System.out.println("Game over for "+players[i]);
+                    System.out.println(players[i]+" accumulated "+players[i].getScore()+" points.");
+                    finished.add(i);
+                    players_finished+=1;
+                    continue;
                 }
                 players[i].play(dice, game);
                 if(players[i].getPosition()==13){
                     System.out.println("Game over for "+players[i]);
                     System.out.println(players[i]+" accumulated "+players[i].getScore()+" points.");
+                    finished.add(i);
                     players_finished+=1;
                 }
                 System.out.println("\n----------------------------------------------");
             }
         }
         System.out.println("\n------------------------------------------------");
+        rankings();
+    }
+
+    void rankings(){
+        int i=1;
+        System.out.println("\n-----------------------------------------------");
+        System.out.println("Printing rankings on the basis of finishing time");
+        for(int id : finished){
+            if(players[id].getPosition()==13)
+            System.out.println(i+"--> "+players[id]);
+        }
+        System.out.println("-----------------------------------------------");
     }
     
     @Override
